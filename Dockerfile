@@ -1,6 +1,6 @@
-FROM ubuntu:23.04
+FROM ubuntu:24.04
 
-MAINTAINER Brian Lycett <brian@wheelybird.com>
+LABEL org.opencontainers.image.authors="s.rossovskii@gmail.com"
 
 RUN apt-get update && apt-get install -y --no-install-recommends wget ca-certificates gnupg && \
     DEBIAN_FRONTEND=noninteractive \
