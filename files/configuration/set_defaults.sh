@@ -11,13 +11,34 @@ show_error () {
  abort=1
 }
 
+show_auth_error() {
+ echo "**"
+ echo
+ echo "Authentication configuration error:"
+ echo "You must choose either client certificate authentication (USE_CLIENT_CERTIFICATE=true)"
+ echo "or LDAP authentication (by setting LDAP_URI and LDAP_BASE_DN)"
+ echo "but not both or neither."
+ echo
+ echo "**"
+ echo
+ abort=1
+}
+
+# Set default authentication method
 if [ "${USE_CLIENT_CERTIFICATE}x" == "x" ]; then export USE_CLIENT_CERTIFICATE="false"; fi
 
+# Check server common name
 if [ "${OVPN_SERVER_CN}x" == "x" ]; then show_error OVPN_SERVER_CN ; fi
 
-if [ "${USE_CLIENT_CERTIFICATE}" != "true" ]; then
- if [ "${LDAP_URI}x" == "x" ]; then show_error LDAP_URI ; fi
- if [ "${LDAP_BASE_DN}x" == "x" ]; then show_error LDAP_BASE_DN ; fi
+# Authentication validation
+if [ "${USE_CLIENT_CERTIFICATE}" == "true" ]; then
+    if [ "${LDAP_URI}x" != "x" ] || [ "${LDAP_BASE_DN}x" != "x" ]; then
+        show_auth_error
+    fi
+else
+    if [ "${LDAP_URI}x" == "x" ] || [ "${LDAP_BASE_DN}x" == "x" ]; then
+        show_auth_error
+    fi
 fi
 
 if [ "$abort" == "1" ]; then exit 1 ; fi
@@ -68,6 +89,3 @@ else
  LOG_FILE="${LOG_DIR}/openvpn.log"
  touch $LOG_FILE
 fi
-
-
-

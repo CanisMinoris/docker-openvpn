@@ -64,7 +64,7 @@ fi
 cat <<Part02 >>$CONFIG_FILE
 
 # As we're using LDAP, each client can use the same certificate
-duplicate-cn
+# duplicate-cn
 
 tls-server
 tls-auth $PKI_DIR/ta.key 0 
