@@ -10,4 +10,3 @@ if [ ! -f "$PKI_DIR/issued/server.crt" ] || [ "$REGENERATE_CERTS" == 'true' ]; t
  openvpn --genkey secret $PKI_DIR/ta.key
  $EASYCMD build-server-full server nopass
 fi
-$EASYCMD --req-cn="$OVPN_SERVER_CN" build-ca nopass
