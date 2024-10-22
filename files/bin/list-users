@@ -3,7 +3,7 @@
 PKI_DIR="/etc/openvpn/pki"
 CONFIG_FILE="/opt/configuration/set_defaults.sh"
 
-# Source the configuration file to get USE_CLIENT_CERTIFICATE
+# Source the configuration file
 if [ -f "$CONFIG_FILE" ]; then
     source "$CONFIG_FILE"
 else
@@ -12,8 +12,7 @@ else
 fi
 
 if [ "$USE_CLIENT_CERTIFICATE" != "true" ]; then
-    echo "Error: Client certificates are not in use (USE_CLIENT_CERTIFICATE is not set to 'true')." >&2
-    echo "User list is not applicable in this configuration." >&2
+    echo "Error: Client certificates are not enabled (USE_CLIENT_CERTIFICATE is not set to 'true')." >&2
     exit 1
 fi
 
@@ -22,14 +21,44 @@ if [ ! -d "$PKI_DIR/issued" ]; then
     exit 1
 fi
 
-echo "List of OpenVPN users:"
-echo "---------------------"
+# Function to check if certificate is revoked
+check_cert_status() {
+    local username="$1"
+    local cert_path="$PKI_DIR/issued/$username.crt"
+    local index_path="$PKI_DIR/index.txt"
+    
+    # Get certificate serial number
+    local serial=$(openssl x509 -in "$cert_path" -noout -serial | cut -d'=' -f2)
+    
+    # Check index.txt for revocation status
+    if grep -q "^R.*$serial" "$index_path"; then
+        echo "REVOKED"
+    else
+        # Get expiration date
+        local expire_date=$(openssl x509 -in "$cert_path" -noout -enddate | cut -d'=' -f2)
+        local expire_epoch=$(date -d "$expire_date" +%s)
+        local current_epoch=$(date +%s)
+        
+        if [ $current_epoch -gt $expire_epoch ]; then
+            echo "EXPIRED"
+        else
+            echo "VALID"
+        fi
+    fi
+}
 
+# Print header
+printf "%-20s %-15s %-25s\n" "USERNAME" "STATUS" "EXPIRY DATE"
+printf "%-20s %-15s %-25s\n" "--------" "------" "------------"
+
+# List all certificates except server and CA
 for cert in "$PKI_DIR/issued"/*.crt; do
     if [ -f "$cert" ]; then
         username=$(basename "$cert" .crt)
         if [ "$username" != "server" ] && [ "$username" != "ca" ]; then
-            echo "$username"
+            status=$(check_cert_status "$username")
+            expire_date=$(openssl x509 -in "$cert" -noout -enddate | cut -d'=' -f2)
+            printf "%-20s %-15s %-25s\n" "$username" "$status" "$expire_date"
         fi
     fi
 done
