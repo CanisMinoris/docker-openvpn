@@ -16,9 +16,10 @@ dev $OVPN_INTERFACE_NAME
 dev-type tun
 
 ca $PKI_DIR/ca.crt
-cert $PKI_DIR/issued/${OVPN_SERVER_CN}.crt
-key $PKI_DIR/private/${OVPN_SERVER_CN}.key
+cert $PKI_DIR/issued/server.crt
+key $PKI_DIR/private/server.key
 dh $PKI_DIR/dh.pem
+
 
 Part01
 
