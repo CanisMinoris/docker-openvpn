@@ -1,7 +1,5 @@
 CONFIG_FILE="${OPENVPN_DIR}/server.conf"
-
 echo "openvpn: creating server config"
-
 echo "# OpenVPN server configuration" > $CONFIG_FILE
 
 if [ "${OVPN_DEFAULT_SERVER}" == "true" ]; then
@@ -9,28 +7,41 @@ if [ "${OVPN_DEFAULT_SERVER}" == "true" ]; then
 fi
 
 cat <<Part01 >>$CONFIG_FILE
-
 port $OVPN_PORT
 proto $OVPN_PROTOCOL
 dev $OVPN_INTERFACE_NAME
 dev-type tun
 
+# Network topology
+topology ${OVPN_TOPOLOGY}
+
+# Client configuration directory
+client-config-dir ${OVPN_CLIENT_CONFIG_DIR}
+
+# Certificate configuration
 ca $PKI_DIR/ca.crt
 cert $PKI_DIR/issued/server.crt
 key $PKI_DIR/private/server.key
 dh $PKI_DIR/dh.pem
-
-
 Part01
 
-if [ "${OVPN_DNS_SERVERS}x" != "x" ] ; then
+# Add IP pool persistence if enabled
+if [ "${OVPN_POOL_PERSIST}" == "true" ]; then
+    echo "ifconfig-pool-persist ${OPENVPN_DIR}/ipp.txt" >> $CONFIG_FILE
+fi
 
+# Add client-to-client if enabled
+if [ "${OVPN_CLIENT_TO_CLIENT}" == "true" ]; then
+    echo "client-to-client" >> $CONFIG_FILE
+fi
+
+# DNS configuration
+if [ "${OVPN_DNS_SERVERS}x" != "x" ] ; then
  nameservers=(${OVPN_DNS_SERVERS//,/ })
  
  for this_dns_server in "${nameservers[@]}" ; do
   echo "push \"dhcp-option DNS $this_dns_server\"" >> $CONFIG_FILE
  done
-
 fi
 
 if [ "${OVPN_DNS_SEARCH_DOMAIN}x" != "x" ]; then
@@ -44,15 +55,12 @@ echo "compress migrate" >> $CONFIG_FILE
 
 if [ "${OVPN_IDLE_TIMEOUT}x" != "x" ] && [ "${OVPN_IDLE_TIMEOUT##*[!0-9]*}" ] ; then
   cat <<TIMEOUTS >> $CONFIG_FILE
-
 inactive $OVPN_IDLE_TIMEOUT
 ping 10
 ping-exit 60
-
 push "inactive $OVPN_IDLE_TIMEOUT"
 push "ping 10"
 push "ping-exit 60"
-
 TIMEOUTS
 else
   echo -e "keepalive 10 60\n\n" >> $CONFIG_FILE
@@ -63,42 +71,36 @@ if [ -f "/tmp/routes_config.txt" ]; then
 fi
 
 cat <<Part02 >>$CONFIG_FILE
-
-# As we're using LDAP, each client can use the same certificate
-# duplicate-cn
-
 tls-server
 tls-auth $PKI_DIR/ta.key 0 
 tls-cipher $OVPN_TLS_CIPHERS
 tls-ciphersuites $OVPN_TLS_CIPHERSUITES
 auth SHA512
-
 user nobody
 group nogroup
-
 persist-key
 persist-tun
-
 status $OPENVPN_DIR/openvpn-status.log
 log-append $LOG_FILE
 verb $OVPN_VERBOSITY
-
 # Do not force renegotiation of client
 reneg-sec 0
-
 Part02
 
-if [ "${USE_CLIENT_CERTIFICATE}" != "true" ] ; then
-
-cat <<Part03 >>$CONFIG_FILE
+# Authentication configuration
+if [ "${USE_CLIENT_CERTIFICATE}" == "true" ] ; then
+    echo "# Client certificate authentication" >> $CONFIG_FILE
+    echo "verify-client-cert require" >> $CONFIG_FILE
+else
+    cat <<Part03 >>$CONFIG_FILE
+# LDAP authentication
 plugin $(dpkg-query -L openvpn | grep openvpn-plugin-auth-pam.so | head -n1) openvpn
 verify-client-cert optional
 username-as-common-name
-
 Part03
-
 fi
 
+# Management interface configuration
 if [ "${OVPN_MANAGEMENT_ENABLE}" == "true" ]; then
  if [ "${OVPN_MANAGEMENT_NOAUTH}" == "true" ]; then
   if [ "${OVPN_MANAGEMENT_PASSWORD}x" != "x" ]; then
@@ -122,4 +124,5 @@ else
   echo "openvpn: management interface disabled"
 fi
 
+# Add any extra configuration
 echo "$OVPN_EXTRA" >> $CONFIG_FILE

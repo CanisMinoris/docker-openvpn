@@ -81,7 +81,13 @@ if [ "${KEY_LENGTH}x" == "x" ];                   then export KEY_LENGTH="2048";
 if [ "${FAIL2BAN_ENABLED}x" == "x" ];             then export FAIL2BAN_ENABLED="false";                             fi
 if [ "${FAIL2BAN_MAXRETRIES}x" == "x" ];          then export FAIL2BAN_MAXRETRIES="3";                              fi
 if [ "${ACTIVE_DIRECTORY_COMPAT_MODE}x" == "x" ]; then export ACTIVE_DIRECTORY_COMPAT_MODE="false";                 fi
-
+if [ "${OVPN_TOPOLOGY}x" == "x" ];                then export OVPN_TOPOLOGY="subnet";                               fi
+if [ "${OVPN_POOL_PERSIST}x" == "x" ];            then export OVPN_POOL_PERSIST="true";                             fi
+if [ "${OVPN_CLIENT_TO_CLIENT}x" == "x" ];        then export OVPN_CLIENT_TO_CLIENT="false";                        fi
+if [ "${OVPN_CLIENT_CONFIG_DIR}x" == "x" ];       then export OVPN_CLIENT_CONFIG_DIR="${OPENVPN_DIR}/ccd";          fi
+if [ "${OVPN_CLIENT_CONFIG_DIR}x" != "x" ]; then
+    mkdir -p "${OVPN_CLIENT_CONFIG_DIR}"
+fi
 if [ "$FAIL2BAN_ENABLED" == "true" ];             then export LOG_TO_STDOUT="false";                                fi
 if [ "$LOG_TO_STDOUT" == "true" ]; then
  LOG_FILE="/proc/1/fd/1"
