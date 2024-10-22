@@ -9,7 +9,7 @@ fi
 
 USERNAME="$1"
 
-if [ ! -f "$PKI_DIR/private/${OVPN_SERVER_CN}.key" ]; then
+if [ ! -f "$PKI_DIR/private/server.key" ]
     echo >&2
     echo "**" >&2
     echo "The server key wasn't found, which means that something's" >&2
