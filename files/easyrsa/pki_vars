@@ -3,7 +3,6 @@ export EASYRSA_OPENSSL="openssl"
 export EASYRSA_PKI="/etc/openvpn/pki"
 
 export EASYRSA_BATCH="true"
-export EASYRSA_REQ_CN=$OVPN_SERVER_CN
 
 export EASYRSA_REQ_COUNTRY="ZA"
 export EASYRSA_REQ_PROVINCE="Nowhere"

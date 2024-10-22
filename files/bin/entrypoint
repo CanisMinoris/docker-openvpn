@@ -39,6 +39,7 @@ if [ "${FAIL2BAN_ENABLED}" == "true" ] ; then
   source "$CONFIGFILES/setup_fail2ban.sh"
 fi
 
+if [ "${USE_CLIENT_CERTIFICATE}" != "true" ] ; then
 echo
 echo "$(date +'%F %T') - Generating client config ..."
 echo
@@ -50,6 +51,7 @@ echo
 echo "$(date +'%F %T') - Starting NSCLD... (ignore any NSS_LDAP module warnings)"
 echo
 nslcd
+fi
 
 
 echo

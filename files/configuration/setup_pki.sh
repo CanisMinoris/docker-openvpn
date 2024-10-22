@@ -4,11 +4,10 @@ if [ ! -f "$PKI_DIR/issued/server.crt" ] || [ "$REGENERATE_CERTS" == 'true' ]; t
  EASYCMD="/opt/easyrsa/easyrsa"
  . /opt/easyrsa/pki_vars
  
- export EASYRSA_REQ_CN="$OVPN_SERVER_CN"
- 
  $EASYCMD init-pki
- $EASYCMD build-ca nopass
+ $EASYCMD --req-cn="$OVPN_SERVER_CN" build-ca nopass
  $EASYCMD gen-dh
  openvpn --genkey secret $PKI_DIR/ta.key
  $EASYCMD build-server-full server nopass
 fi
+$EASYCMD --req-cn="$OVPN_SERVER_CN" build-ca nopass
