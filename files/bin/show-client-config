@@ -74,11 +74,9 @@ fi
 cat << EOF
 # Set log file verbosity
 verb $OVPN_VERBOSITY
-<connection>
 remote $OVPN_SERVER_CN $OVPN_PORT $OVPN_PROTOCOL
 float
 nobind
-</connection>
 <ca>
 $(cat $PKI_DIR/ca.crt)
 </ca>
