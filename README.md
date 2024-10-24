@@ -1,3 +1,51 @@
+
+
+# Breaking Changes and New Features
+
+## Authentication Methods
+
+### Breaking Changes
+* Removed the ability to use client certificates as an additional security layer alongside LDAP
+* Client certificates and LDAP are now mutually exclusive authentication methods
+* Changed behavior of `USE_CLIENT_CERTIFICATE`:
+  * When `true`: Uses only certificate-based authentication
+  * When `false`: Uses only LDAP authentication (with optional OTP)
+
+### New Certificate Management Features
+* Added dedicated certificate management tools:
+  * `generate-client-cert <username>`: Creates individual client certificates
+  * `list-users`: Shows users with certificate status (VALID/REVOKED/EXPIRED)
+  * `revoke-cert <username>`: Handles certificate revocation
+  * Modified `show-client-config` to support user-specific configurations
+
+## Routing Configuration
+
+### Breaking Changes
+* Removed original `OVPN_ROUTES` variable
+* Introduced new routing variables with different behavior:
+  * `OVPN_REMOTE_ROUTES`: Routes pushed to clients (format: network_address netmask gateway)
+  * `OVPN_LOCAL_ROUTES`: Routes added to server without client push
+  * `OVPN_REDIRECT_GATEWAY`: Controls global traffic redirection
+
+## New Network Configuration Options
+* Added `OVPN_TOPOLOGY`: Controls network topology (subnet, net30, p2p)
+* Added `OVPN_POOL_PERSIST`: Controls IP address persistence
+* Added `OVPN_CLIENT_TO_CLIENT`: Enables inter-client communication
+* Added `OVPN_CLIENT_CONFIG_DIR`: Supports client-specific configurations
+
+## Migration Notes
+### Certificate Authentication Migration
+* Choose either LDAP or certificate-based authentication
+* Reconfigure clients accordingly
+* Existing certificates will need to be regenerated using new management tools
+* Plan for certificate distribution to end users
+
+### Routes Migration
+* Migrate routes from `OVPN_ROUTES` to either `OVPN_REMOTE_ROUTES` or `OVPN_LOCAL_ROUTES`
+* Update route format to include gateway information
+* Review `OVPN_REDIRECT_GATEWAY` setting
+
+# OpenVPN Server with LDAP/Certificate Authentication
 ## OpenVPN container
 
 This will create an OpenVPN server supporting two authentication methods:
