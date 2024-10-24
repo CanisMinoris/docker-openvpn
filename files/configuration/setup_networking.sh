@@ -21,47 +21,42 @@ if [ "${OVPN_ROUTES}x" != "x" ]; then
   echo "" >/tmp/routes_config.txt
 
   for this_route in ${route_list[@]}; do
-
     echo "routes: adding route $this_route to server config"
     echo "push \"route $this_route\"" >>/tmp/routes_config.txt
-
-    if [ "$OVPN_NAT" == "true" ]; then
-      IFS=" "
-      this_net=$(echo $this_route | awk '{ print $1 }')
-      this_cidr=$(ipcalc -nb $this_route | grep ^Netmask | awk '{ print $NF }')
-      IFS=","
-      to_masquerade="${this_net}/${this_cidr}"
-      echo "iptables: masquerade from $ovpn_net to $to_masquerade via $this_natdevice"
-      echo -n "iptables: "
-      if iptables -t nat -C POSTROUTING -s "$ovpn_net" -d "$to_masquerade" -o "$this_natdevice" -j MASQUERADE > /dev/null 2>&1; then
-        echo "Rule already present. Skipping..."
-      else
-        echo "Rule missing. Creating rule..."
-        iptables -t nat -A POSTROUTING -s "$ovpn_net" -d "$to_masquerade" -o "$this_natdevice" -j MASQUERADE
-      fi
-    fi
+#    if [ "$OVPN_NAT" == "true" ]; then
+#      IFS=" "
+#      this_net=$(echo $this_route | awk '{ print $1 }')
+#      this_cidr=$(ipcalc -nb $this_route | grep ^Netmask | awk '{ print $NF }')
+#      IFS=","
+#      to_masquerade="${this_net}/${this_cidr}"
+#      echo "iptables: masquerade from $ovpn_net to $to_masquerade via $this_natdevice"
+#      echo -n "iptables: "
+#      if iptables -t nat -C POSTROUTING -s "$ovpn_net" -d "$to_masquerade" -o "$this_natdevice" -j MASQUERADE > /dev/null 2>&1; then
+#        echo "Rule already present. Skipping..."
+#      else
+#        echo "Rule missing. Creating rule..."
+#        iptables -t nat -A POSTROUTING -s "$ovpn_net" -d "$to_masquerade" -o "$this_natdevice" -j MASQUERADE
+#      fi
+#    fi
 
   done
 
   IFS=" "
 
 else
-
   #If no routes are set then we'll redirect all traffic from the client over the tunnel.
-
   echo "push \"redirect-gateway def1\"" >>/tmp/routes_config.txt
+fi
 
-  if [ "$OVPN_NAT" == "true" ]; then
-    echo "iptables: masquerade from $ovpn_net to everywhere via $this_natdevice"
-    echo -n "iptables: "
-    if iptables -t nat -C POSTROUTING -s "$ovpn_net" -o "$this_natdevice" -j MASQUERADE > /dev/null 2>&1; then
-      echo "Rule already present. Skipping..."
-    else
-      echo "Rule missing. Creating rule..."
-      iptables -t nat -A POSTROUTING -s "$ovpn_net" -o "$this_natdevice" -j MASQUERADE
-    fi
+if [ "$OVPN_NAT" == "true" ]; then
+  echo "iptables: masquerade from $ovpn_net to everywhere via $this_natdevice"
+  echo -n "iptables: "
+  if iptables -t nat -C POSTROUTING -s "$ovpn_net" -o "$this_natdevice" -j MASQUERADE > /dev/null 2>&1; then
+    echo "Rule already present. Skipping..."
+  else
+    echo "Rule missing. Creating rule..."
+    iptables -t nat -A POSTROUTING -s "$ovpn_net" -o "$this_natdevice" -j MASQUERADE
   fi
-
 fi
 
 # Append extra iptables rules from a file if specified
