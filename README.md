@@ -83,7 +83,6 @@ Generate client configuration:
  * `OVPN_PROTOCOL` (udp):  The protocol OpenVPN uses.  Either `udp` or `tcp`.
  * `OVPN_INTERFACE_NAME` (tun):  The name of the network tunnel interface OpenVPN uses.
  * `OVPN_NETWORK` (10.50.50.0 255.255.255.0):  The network that will be used the the VPN in `network_address netmask` format.
- * `OVPN_ROUTES` (_undefined_):  A comma-separated list of routes that OpenVPN will push to the client, in `network_address netmask` format.  e.g. `172.16.10.0 255.255.255.0,172.17.20.0 255.255.255.0`.  If NAT isn't enabled then you'll need to ensure that destinations on the network have the return route set for the OpenVPN network.  The default is to pass all traffic through the VPN tunnel (which will also enable NAT).
  * `OVPN_NAT` (true):  If set to true then the client traffic will be masqueraded by the OpenVPN server.  This allows you to connect to targets on the other side of the tunnel without needing to add return routes to those targets (the targets will see the OpenVPN server's IP rather than the client's).
  * `OVPN_DNS_SERVERS` (_undefined_):  A comma-separated list of DNS nameservers to push to the client.  Set this if the remote network has its own DNS or if you route all traffic through the VPN and the remote side blocks access to external name servers.  Note that not all OpenVPN clients will automatically use these nameservers.  e.g. `8.8.8.8,8.8.4.4`
  * `OVPN_DNS_SEARCH_DOMAIN` (_undefined_):  If using the remote network's DNS server then push the search domain (or domains) to the client.  This will allow the client to lookup by hostnames rather than fully-qualified domain names.  i.e. setting this to `example.org` will allow `ping remotehost` instead of `ping remotehost.example.org`.  Separate multiple domains with commas, e.g. `example.org,wheelybird.com,test.net`.
@@ -110,6 +109,9 @@ Generate client configuration:
  * `OVPN_POOL_PERSIST` (true): If enabled, saves IP address assignments across restarts in `/etc/openvpn/ipp.txt`.
  * `OVPN_CLIENT_TO_CLIENT` (false): If set to true, allows VPN clients to communicate with each other directly.
  * `OVPN_CLIENT_CONFIG_DIR` (/etc/openvpn/ccd): Directory for client-specific configuration files. This allows you to set specific options (like static IP addresses) for individual clients.
+ * `OVPN_REMOTE_ROUTES` (_undefined_): A comma-separated list of routes that OpenVPN will push to the client, in `network_address netmask gateway` format. e.g. `172.16.10.0 255.255.255.0 10.50.50.1,172.17.20.0 255.255.255.0 10.50.50.2`. These routes will be sent to clients using the `push "route"` directive.
+ * `OVPN_LOCAL_ROUTES` (_undefined_): A comma-separated list of routes that will be added to OpenVPN server configuration without pushing to clients, in `network_address netmask gateway` format. e.g. `172.16.10.0 255.255.255.0 10.50.50.1,172.17.20.0 255.255.255.0 10.50.50.2`. These routes will be added using the `route` directive.
+ * `OVPN_REDIRECT_GATEWAY` (true): If set to true, all client traffic will be redirected through the VPN using the `push "redirect-gateway def1"` directive. Set to false if you only want specific routes to be pushed to clients.
 
 ## Data persistence
 

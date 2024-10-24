@@ -61,6 +61,9 @@ if [ "${OVPN_PORT}x" == "x" ];                    then export OVPN_PORT="1194"; 
 if [ "${OVPN_PROTOCOL}x" == "x" ];                then export OVPN_PROTOCOL="udp";                                  fi
 if [ "${OVPN_INTERFACE_NAME}x" == "x" ];          then export OVPN_INTERFACE_NAME="tun";                            fi
 if [ "${OVPN_NETWORK}x" == "x" ];                 then export OVPN_NETWORK="10.50.50.0 255.255.255.0";              fi
+if [ "${OVPN_REMOTE_ROUTES}x" == "x" ];           then export OVPN_REMOTE_ROUTES="";                                fi
+if [ "${OVPN_LOCAL_ROUTES}x" == "x" ];            then export OVPN_LOCAL_ROUTES="";                                 fi
+if [ "${OVPN_REDIRECT_GATEWAY}x" == "x" ];        then export OVPN_REDIRECT_GATEWAY="true";                         fi
 if [ "${OVPN_VERBOSITY}x" == "x" ];               then export OVPN_VERBOSITY="3";                                   fi
 if [ "${OVPN_NAT}x" == "x" ];                     then export OVPN_NAT="true";                                      fi
 if [ "${OVPN_REGISTER_DNS}x" == "x" ];            then export OVPN_REGISTER_DNS="false";                            fi
